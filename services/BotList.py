@@ -3,7 +3,7 @@ from core.Route import Route
 from services.CustomRoute import CustomRoute
 
 
-class BotList(Route, APIView):
+class BotList(CustomRoute, APIView):
 
     def get_method(self) -> str:
         return "GET"
