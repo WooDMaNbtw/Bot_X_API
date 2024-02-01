@@ -4,6 +4,7 @@ from requests import JSONDecodeError
 from .Logger import Logger
 from .settings import APP_ID, THIRD_PARTY_APP_URL, LOCALHOST, BASE_URI
 from .Methods import Methods
+from copy import copy
 
 
 class Route(Methods):
@@ -128,7 +129,7 @@ class Route(Methods):
             response_headers = dict(response.headers)
             response_status_code = response.status_code
 
-        self.response_core_setter(response_body, response_headers, response_status_code)
+        self.response_core_setter(copy(response_body), response_headers, response_status_code)
 
         #  filtered headers
         response_headers = {k: v for k, v in response_headers.items() if k not in self._not_allowed_headers}
