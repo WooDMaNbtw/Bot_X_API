@@ -2,7 +2,7 @@ from core.Route import Route
 from rest_framework.views import APIView
 
 
-class DialogueBase(Route, APIView):
+class DialogueIdBase(Route, APIView):
 
     def get_method(self) -> str:
         if self.request.method == 'GET':

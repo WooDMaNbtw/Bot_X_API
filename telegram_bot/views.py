@@ -7,6 +7,7 @@ import requests
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from werkzeug.security import generate_password_hash, check_password_hash
 from django.core.cache import cache
+import requests
 
 ''' django setup '''
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
@@ -49,8 +50,8 @@ async def start(clb: CallbackQuery):
                 await clb.answer("Token was not provided...")
                 raise requests.exceptions.ProxyError("Invalid token")
 
+            await clb.answer(text=f"{email}, {expires_in}, {token}, {password}")  # будет вызываться main_menu
             cache.set(key=cache_key, value={"email": user.email, "token": token}, timeout=expires_in)
-            await main_menu(clb)
 
         elif login._status_code == 401:
             await clb.answer("Invalid email or password")
@@ -59,7 +60,8 @@ async def start(clb: CallbackQuery):
         elif login._status_code == 500:
             await clb.answer("Server error, please try again later")
     else:
-        await main_menu(clb)
+        email, token = cached_user.values()  # будет вызываться main_menu
+        await clb.answer(text=f"Email: {email}\n Token: {token}")
 
 
 @router.callback_query(F.data == "main_menu")

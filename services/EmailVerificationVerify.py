@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from services.CustomRoute import CustomRoute
 
 
-class EmailVerificationVerify(CustomRoute, APIView):
+class EmailVerificationVerify(Route, APIView):
     def __init__(self, data: dict = None, headers: dict = {}, token=None, need_execute_local=False):
         self.data: dict = data
         self.headers: dict = headers

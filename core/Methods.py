@@ -1,20 +1,20 @@
 from django.http import HttpResponse
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from .settings import APP_ID, THIRD_PARTY_APP_URL
+from .settings import APP_ID
 
 
 class Methods:
 
     def request_setter(self, request, *args, **kwargs):
         self.set_method(self.get_method())
-        self.set_url(f'{self._THIRD_PARTY_APP_URL}{APP_ID}{self.get_path()}')
-        self.set_headers(dict(request.headers))
-
-        if self.get_method() == "GET":
-            self.set_parameters(dict(request.query_params))
+        if self.get_method() == "GET" and request.query_params:
+            query_params = '?' + '&'.join([f"{key}={value}" for key, value in request.query_params.items()])
+            self.set_url(f'{self._THIRD_PARTY_APP_URL}{APP_ID}{self.get_path()}{query_params}')
         else:
-            self.set_parameters(request.data)
+            self.set_url(f'{self._THIRD_PARTY_APP_URL}{APP_ID}{self.get_path()}')
+
+        self.set_headers(dict(request.headers))
+        self.set_request(request.data)
 
     def get(self, request, *args, **kwargs):
         self.request_setter(request, *args, **kwargs)

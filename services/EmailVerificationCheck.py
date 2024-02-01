@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from services.CustomRoute import CustomRoute
 
 
-class EmailVerificationCheck(CustomRoute, APIView):
+class EmailVerificationCheck(Route, APIView):
     def __init__(self, headers={}, token=None, need_execute_local=False):
         self.headers: dict = headers
         self.headers["Authorization"] = f"Bearer {token}"

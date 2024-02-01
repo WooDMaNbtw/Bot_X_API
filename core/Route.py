@@ -1,10 +1,6 @@
 import inspect
-from typing import Any
-
-from django.core.management.commands.runserver import Command
 import requests
-import html
-from django.urls import resolve, reverse
+from requests import JSONDecodeError
 from .Logger import Logger
 from .settings import APP_ID, THIRD_PARTY_APP_URL, LOCALHOST, BASE_URI
 from .Methods import Methods
@@ -15,9 +11,8 @@ class Route(Methods):
         self._APP_ID = APP_ID
         self._THIRD_PARTY_APP_URL = THIRD_PARTY_APP_URL
         self._method: str | None = None
-        self._parameters: dict | None = None
-        self.__response_body: dict | None = None
-        self.__response_copy: dict | None = None
+        self._request: dict | None = None
+        self._response: dict | None = None
         self._headers: dict | None = None
         self.__request_headers: dict | None = None
         self._url: str | None = None
@@ -57,6 +52,16 @@ class Route(Methods):
             self._logger.set_proxy_request_body(request.data)
         super().request_setter(request)
 
+    def response_core_setter(self, response, headers, status_code):
+        self._logger.set_core_response_headers(headers)
+        self._logger.set_core_response_body(response)
+        self._logger.set_core_response_status_code(status_code)
+
+    def response_proxy_setter(self, response, headers, status_code):
+        self._logger.set_proxy_response_body(response)
+        self._logger.set_proxy_response_headers(headers)
+        self._logger.set_proxy_response_status_code(status_code)
+
     def set_method(self, method: str) -> None:
         self._method = method
         self._logger.set_core_method(method)
@@ -80,25 +85,27 @@ class Route(Methods):
     def get_headers(self) -> dict:
         return self._headers
 
-    def set_parameters(self, data: dict) -> None:
-        self._parameters = data
+    def set_request(self, data: dict) -> None:
+        self._request = data
         self._logger.set_core_request_body(data)
 
-    def get_parameters(self) -> dict:
-        return self._parameters
+    def get_request(self) -> dict:
+        return self._request
 
-    def set_response(self, response: dict | None, status=None) -> None:
-        self._logger.set_proxy_response_body(response)
-        self._logger.set_proxy_response_status_code(status)
-        if response is not None and status is not None:
-            if 200 <= status < 300:
+    def set_response(self, response: dict | None, headers: dict | None, status_code=None, ) -> None:
+        if response is not None and status_code is not None:
+            if 200 <= status_code < 300:
                 response = self.on_success(response)
-            if 400 <= status <= 500:
+            if 400 <= status_code <= 500:
                 response = self.on_error(response)
-        self.__response_copy = response
+
+        self._response = response
+        self._headers = headers
+        self._status_code = status_code
+        self.response_proxy_setter(response, headers, status_code)
 
     def get_response(self) -> dict | None:
-        return self.__response_copy
+        return self._response
 
     def on_success(self, response: dict) -> dict:
         return response
@@ -107,41 +114,34 @@ class Route(Methods):
         return response
 
     def send(self) -> tuple:
-
         response = requests.request(
             method=self.get_method(),
             url=self.get_url(),
-            json=self.get_parameters(),
+            json=self.get_request(),
             headers=self.get_headers()
         )
+        try:
+            response_body = response.json()
+        except JSONDecodeError as ex:
+            response_body = response.text if response.text else None
+        finally:
+            response_headers = dict(response.headers)
+            response_status_code = response.status_code
 
-        content_type = response.headers.get("Content-Type", "")
+        self.response_core_setter(response_body, response_headers, response_status_code)
 
-        self.__response_copy = response.text if response.text else None
-        self.__response_body = response.text if response.text else None
-
-        if 'application/json' in content_type:
-            self.__response_copy = response.json()
-            self.__response_body = response.json()
-
-        self._logger.set_core_response_headers(dict(response.headers))
-        self._logger.set_core_response_body(self.__response_body)
-        self._logger.set_core_response_status_code(response.status_code)
-
-        filtered_headers = {k: v for k, v in response.headers.items() if k not in self._not_allowed_headers}
-        response.headers = filtered_headers
-
-        response.headers.update({
+        #  filtered headers
+        response_headers = {k: v for k, v in response_headers.items() if k not in self._not_allowed_headers}
+        response_headers.update({
             'Access-Control-Allow-Headers': '*',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': '*'
         })
 
-        self.set_response(self.__response_copy, response.status_code)
-        self._logger.set_proxy_response_headers(response.headers)
+        self.set_response(response_body, response_headers, response_status_code)
 
         self._logger.write()
 
-        return self.get_response(), response.headers, response.status_code
+        return self.get_response(), self.get_headers(), self._status_code
 
 
