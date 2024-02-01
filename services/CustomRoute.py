@@ -10,5 +10,4 @@ class CustomRoute(Route):
             if 'error' in response:
                 super().set_response(response['error'], status_code)
                 response['error'] = super().get_response()
-            response["SDJAHDKKASJDA"] = "DSAJDKHADS"
         super().set_response(response, headers, status_code)
