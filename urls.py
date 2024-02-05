@@ -14,10 +14,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from services import BotList, BotDetail, Register, Login, Logout, EmailVerificationCheck, EmailVerificationResend, EmailVerificationVerify
+from botX.services import Register, Login, Logout, EmailVerificationVerify, EmailVerificationResend, BotDetail, BotList, \
+    EmailVerificationCheck
 from django.urls import path
 from django.contrib import admin
-from services.base import MessageBase, DialogueBase, DialogueIdBase
+from botX.services.base import DialogueBase, DialogueIdBase, MessageBase
 
 urlpatterns = [
     path("admin/", admin.site.urls),

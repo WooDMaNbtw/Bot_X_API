@@ -1,4 +1,4 @@
-from core.Route import Route
+from botX.core.Route import Route
 
 
 class CustomRoute(Route):

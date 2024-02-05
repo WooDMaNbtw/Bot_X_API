@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from core.Route import Route
+from botX.core.Route import Route
 
 
 class MessageList(Route, APIView):
