@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
-from botX.core.Route import Route
+from core.Route import Route
+from services.CustomRoute import CustomRoute
 
 
 class Logout(Route, APIView):

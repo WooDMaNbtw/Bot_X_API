@@ -1,4 +1,4 @@
-from botX.core.Route import Route
+from core.Route import Route
 from rest_framework.views import APIView
 
 
