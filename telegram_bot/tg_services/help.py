@@ -5,10 +5,11 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from itertools import groupby
 from operator import itemgetter
-from telegram_bot.assets import HELP_MESSAGE, WELCOME_MESSAGE
+# from telegram_bot.assets import HELP_MESSAGE, WELCOME_MESSAGE
+from .assets import HELP_MESSAGE, WELCOME_MESSAGE
 
-from services import Register, Login, BotList, BotDetail, DialogueList
-from start import router
+from Bot_X_API.services import Register, Login, BotList, BotDetail, DialogueList
+from .assets import router
 
 @router.callback_query(F.data == "help")
 @router.message(Command("help"))
