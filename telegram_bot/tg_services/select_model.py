@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from itertools import groupby
 from operator import itemgetter
 from services import Register, Login, BotList, BotDetail, DialogueList
-from start import router
+from .assets import router
 
 
 def add_buttons(builder, items, key_prefix, back_prefix):
@@ -26,7 +26,7 @@ async def select_model(callback: CallbackQuery):
     bot_list_result = {key: [item["model_name"] for item in group] for key, group in
                     groupby(sorted_data, key=itemgetter("author"))}
 
-    # bot_list = {'1111': ['aaaa', 'bbbb', 'cccc'], '2222': ['dddd', 'ffff']}
+    # bot_list_result = {'1111': ['aaaa', 'bbbb', 'cccc'], '2222': ['dddd', 'ffff']}
     models = []
     builder = InlineKeyboardBuilder()
 
