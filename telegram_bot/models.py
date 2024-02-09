@@ -13,6 +13,7 @@ class User(models.Model):
         return f"{self.user_id} | {self.email} | {self.created_at}"
 
     class Meta:
+        app_label = 'telegram_bot'
         ordering = ["id"]
         verbose_name = "User"
         verbose_name_plural = "Users"
