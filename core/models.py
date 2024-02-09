@@ -26,6 +26,7 @@ class Log(models.Model):
         return f"Created at - {self.created_at} | Proxy method - {self.proxy_method} | Core method - {self.core_method}"
 
     class Meta:
+        app_label = 'core'
         ordering = ["id"]
         verbose_name = "Log"
         verbose_name_plural = "Logs"
