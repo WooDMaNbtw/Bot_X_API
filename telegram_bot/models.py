@@ -3,6 +3,7 @@ from django.db import models
 
 class User(models.Model):
     user_id = models.BigIntegerField(blank=True, null=True)
+    user_core_id = models.BigIntegerField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     password = models.CharField(max_length=255)
     balance = models.FloatField(blank=True, null=True)

@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
-from core.Route import Route
 from services.CustomRoute import CustomRoute
 
 
 class BotList(Route, APIView):
+    def __init__(self, use_cache=True):
+        super().__init__(use_cache=use_cache)
 
     def get_method(self) -> str:
         return "GET"
