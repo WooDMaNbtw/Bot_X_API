@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 
 
-import os
+import os, platform
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -42,7 +42,7 @@ env = environ.Env(
     POSTGRES_DB_PORT=int,
     LOCALHOST=str,
     ALLOWED_HOSTS=str,
-    INTERNAL_IPS=str
+    INTERNAL_IPS=str,
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -108,6 +108,13 @@ TEMPLATES = [
     },
 ]
 
+dbHost: str = ""
+if os.getenv('DOCKER_CONTAINER'):
+    dbHost = env("POSTGRES_DB_HOST")
+else:
+    dbHost = "localhost"
+
+
 
 # Database
 DATABASES = {
@@ -116,7 +123,7 @@ DATABASES = {
         'NAME': env("POSTGRES_DB_NAME"),
         'USER': env("POSTGRES_DB_USER"),
         'PASSWORD': env("POSTGRES_DB_PASSWORD"),
-        'HOST': env("POSTGRES_DB_HOST"),
+        'HOST': dbHost,
         'PORT': env("POSTGRES_DB_PORT"),
     }
 }
@@ -180,7 +187,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'bot_x', 'static')
+
 
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(", ")
 

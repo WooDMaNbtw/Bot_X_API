@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  django:
+    image: proxy-botx:0.1
+    container_name: django-botx
+    build:
+      context: .
+    environment:
+      - DOCKER_CONTAINER=1 # для определения запущен ли django локально или нет
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:${DRF_PORT}"
+    volumes:
+      - ./bot_x:/bot_x
+    env_file:
+      - .env
+    entrypoint: "/scripts/entrypoint.sh"
+    networks:
+      - botx
+
+  postgres:
+    image: postgres:14.8-alpine3.18
+    container_name: postgresdb
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_DB_PORT}:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+    networks:
+      - botx
+
+
+  pg-admin:
+    image: dpage/pgadmin4:7
+    container_name: pgadmin
+    depends_on:
+      - postgres
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+      - PGADMIN_LISTEN_PORT=${PGADMIN_LISTEN_PORT}
+    env_file:
+      - .env
+    ports:
+      - "${PGADMIN_LISTEN_PORT}:5050"
+    restart: always
+    networks:
+      - botx
+
+volumes:
+  data:
+
+networks:
+  botx:
