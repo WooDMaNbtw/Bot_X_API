@@ -121,14 +121,16 @@ class Route(Methods):
             headers=self.get_headers()
         )
         try:
-            response_body = response.json()
+            response_body_core = response.json()
+            response_body_proxy = response.json()
         except JSONDecodeError as ex:
-            response_body = response.text if response.text else None
+            response_body_core = response.text if response.text else None
+            response_body_proxy = response.text if response.text else None
         finally:
             response_headers = dict(response.headers)
             response_status_code = response.status_code
 
-        self.response_core_setter(response_body, response_headers, response_status_code)
+        self.response_core_setter(response_body_core, response_headers, response_status_code)
 
         #  filtered headers
         response_headers = {k: v for k, v in response_headers.items() if k not in self._not_allowed_headers}
@@ -138,7 +140,7 @@ class Route(Methods):
             'Access-Control-Allow-Methods': '*'
         })
 
-        self.set_response(response_body, response_headers, response_status_code)
+        self.set_response(response_body_proxy, response_headers, response_status_code)
 
         self._logger.write()
 
